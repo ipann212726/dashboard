@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 import boto3
 import json
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -20,7 +21,7 @@ def health_check():
     try:
         ec2 = boto3.client('ec2', region_name='us-east-1')
         vpcs = ec2.describe_vpcs(Filters=[
-            {'Name': 'tag:Name', 'Values': ['LKS-VPC2026']}
+            {'Name': 'tag:Name', 'Values': ['LKS-VPC-2026']}
         ])
         results['checks']['vpc'] = {
             'status': 'PASS' if len(vpcs['Vpcs']) > 0 else 'FAIL',
@@ -45,7 +46,7 @@ def health_check():
     try:
         s3 = boto3.client('s3', region_name='us-east-1')
         buckets = s3.list_buckets()
-        lks_buckets = [b for b in buckets['Buckets'] if 'lks-orders' in b['Name']]
+        lks_buckets = [b for b in buckets['Buckets'] if 'lks-orders-archive' in b['Name']]
         results['checks']['s3'] = {
             'status': 'PASS' if len(lks_buckets) > 0 else 'FAIL',
             'message': f"Found {len(lks_buckets)} LKS bucket(s)"
