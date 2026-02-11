@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Dashboard | Modern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #38bdf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* --- Stats Card --- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .stat-card h3 {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* --- Section Table --- */
+        .orders-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        /* --- Modern Table --- */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .orders-table th {
+            padding: 16px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .orders-table td {
+            padding: 16px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .orders-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* --- Status Badges --- */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-processed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        /* --- Utilities --- */
+        .loading { text-align: center; padding: 40px; color: var(--text-dim); }
+        .error { color: #f87171; background: rgba(248, 113, 113, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        
+        @media (max-width: 600px) {
+            .header { flex-direction: column; text-align: center; gap: 20px; }
+            .section-header { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <h1>LKS SMK2026</h1>
+                <p>System Monitoring Dashboard</p>
+            </div>
+            <button class="refresh-btn" onclick="loadOrders()">
+                <span id="btn-icon">🔄</span> Refresh System
+            </button>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Requests</h3>
+                <div class="number" id="total-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Processed</h3>
+                <div class="number" style="color: var(--success)" id="processed-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <div class="number" style="color: var(--warning)" id="pending-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Uptime</h3>
+                <div class="number" style="font-size: 1.1rem; color: var(--primary)" id="last-updated">--:--</div>
+            </div>
+        </div>
+        
+        <div class="orders-section">
+            <div class="section-header">
+                <h2 style="font-size: 1.2rem;">Live Activity Feed</h2>
+            </div>
+            
+            <div id="error-message"></div>
+            
+            <div class="table-wrapper">
+                <div id="orders-container">
+                    <div class="loading">Syncing with server...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Logika fungsi tetap dipertahankan agar dashboard bekerja sebagaimana mestinya
+        function loadOrders() {
+            const container = document.getElementById('orders-container');
+            const errorDiv = document.getElementById('error-message');
+            
+            container.innerHTML = '<div class="loading">Updating data...</div>';
+            
+            fetch('/api/orders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayOrders(data.orders);
+                        updateStats(data.orders);
+                        updateLastUpdated();
+                    } else {
+                        throw new Error(data.error);
+                    }
+                })
+                .catch(error => {
+                    errorDiv.innerHTML = `<div class="error">System Error: ${error.message}</div>`;
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">Offline Mode</div>';
+                });
+        }
+        
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-container');
+            if (orders.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-dim);">No active processes found.</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Identity</th>
+                            <th>Description</th>
+                            <th>State</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            orders.forEach(order => {
+                const date = new Date(order.timestamp * 1000);
+                const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const rawStatus = order.status || 'pending';
+                const statusClass = rawStatus === 'processed' ? 'status-processed' : 'status-pending';
+
+                tableHTML += `
+                    <tr>
+                        <td style="font-family: monospace; color: var(--primary)">#${order.orderId ?? '-'}</td>
+                        <td style="font-weight: 600">${order.customerName ?? '-'}</td>
+                        <td style="color: var(--text-dim)">${order.items ?? '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${rawStatus.toUpperCase()}</span></td>
+                        <td style="font-size: 0.8rem; color: var(--text-dim)">${time}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table>`;
+            container.innerHTML = tableHTML;
+        }
+        
+        function updateStats(orders) {
+            document.getElementById('total-orders').textContent = orders.length;
+            document.getElementById('processed-orders').textContent = orders.filter(o => o.status === 'processed').length;
+            document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'pending').length;
+        }
+        
+        function updateLastUpdated() {
+            document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+        }
+
+        loadOrders();
+        setInterval(loadOrders, 10000);
+    </script>
+</body>
+</html>
